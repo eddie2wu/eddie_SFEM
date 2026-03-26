@@ -1,5 +1,7 @@
 *.txt
 *.dta
+*.mat
+*.out
 .Rhistory
 .DS_Store
 

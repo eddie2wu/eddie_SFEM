@@ -42,7 +42,6 @@ preprocess_data <- function(file_path = "Data/cleaned_data.csv") {
   #   arrange(id)
   
   
-  
   # Generate coop variable based on conditions
   data <- data %>%
     mutate(
@@ -125,6 +124,10 @@ preprocess_data <- function(file_path = "Data/cleaned_data.csv") {
   
   return(data)
 }
+
+
+
+
 
 dfformatlab_special <- function(data = preprocess_data(), output_dir = "scripts/", strategies_selected = c("ad", "ac", "g", "tft", "wsls", "t2")){
   

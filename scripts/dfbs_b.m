@@ -30,10 +30,12 @@ for i = 1:reps
     end
     max_id_bs = max(id2_bs);
     min_id_bs = min(id2_bs);    
-    for l = min_id_bs:max_id_bs
-        max_match_bs(l) = max(match_bs(find(id2_bs==l)));
-        min_match_bs(l) = min(match_bs(find(id2_bs==l)));
-    end
+    % for l = min_id_bs:max_id_bs
+    %     max_match_bs(l) = max(match_bs(find(id2_bs==l)));
+    %     min_match_bs(l) = min(match_bs(find(id2_bs==l)));
+    % end
+    max_match_bs = 0; min_match_bs = 0;
+    
     % optimization
     [x, ll, hess, exitflag] = opt_part1_b(coop_all_bs, match_bs, min_match_bs, max_match_bs, id2_bs, min_id_bs, max_id_bs, strg_M_bs, K, start);
     for m = 1:3
