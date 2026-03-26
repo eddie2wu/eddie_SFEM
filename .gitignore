@@ -1,0 +1,5 @@
+*.txt
+*.dta
+.Rhistory
+.DS_Store
+
