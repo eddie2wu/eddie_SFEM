@@ -1,4 +1,4 @@
-# RA Task on SFE
+# RA Task on SFEM
 
 Running order for replicating Tables 17 - 19:
 1. run replicate_table_17-19.R from beginning till line 49.
