@@ -2,6 +2,7 @@
 *.dta
 *.mat
 *.out
+*.gph
 .Rhistory
 .DS_Store
 
