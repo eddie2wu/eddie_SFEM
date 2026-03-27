@@ -52,12 +52,15 @@ run_matlab_script <- function(script_name, check_interval = 1) {
   print("MATLAB script has finished executing.")
 }
 
+
+
+
+
 estimation_and_simulation <- function() {
   
   # Set options for RStata
   cat("Please select the path to your Stata executable:\n")
   # chooseStataBin() # Replace with the path to your Stata executable
-  
   
   options(
     RStata.StataPath = "/Applications/Stata/StataSE.app/Contents/MacOS/StataSE",
@@ -77,6 +80,7 @@ estimation_and_simulation <- function() {
     stata(file.path("scripts", script_name), stata.echo = FALSE)
     cat(sprintf("Finished executing Stata script: %s\n", script_name))
   }
+  
   
   # Run R script 1
   cat("Executing R script: learning1.R\n")
@@ -101,6 +105,10 @@ estimation_and_simulation <- function() {
   print("All scripts have finished executing.")
   
 }
+
+
+
+
 
 #' Load MATLAB estimation results
 #'

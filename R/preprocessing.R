@@ -12,7 +12,9 @@ preprocess_data <- function(file_path = "Data/cleaned_data.csv") {
       stage = round
     ) %>%
     mutate(
-      id = as.numeric( as.factor(id)),
+      id = as.numeric(
+        as.factor(id)
+      ),
       treatment = case_when(
         treatment == 7 ~ 1,
         treatment == 19 ~ 2,
@@ -48,11 +50,11 @@ preprocess_data <- function(file_path = "Data/cleaned_data.csv") {
       coop = ifelse(you == 1, 1, 0),
       ocoop = ifelse(other == 1, 1, 0),
       pay = case_when(
-        treatment %in% c("8", "9") ~ "high",
+        treatment %in% c("7", "8") ~ "high",
         TRUE ~ "normal"
       ),
       delta = case_when(
-        treatment %in% c("1", "3", "8", "9") ~ "high",
+        treatment %in% c("2", "4", "5", "6", "7", "8") ~ "high",
         TRUE ~ "low"
       ),
       suggestion = case_when(
@@ -63,6 +65,27 @@ preprocess_data <- function(file_path = "Data/cleaned_data.csv") {
       first_stage = ifelse(stage == 1, 1, 0),
       first_round = ifelse(round == 1, 1, 0)
     )
+  
+  # data <- data %>%
+  #   mutate(
+  #     coop = ifelse(you == 1, 1, 0),
+  #     ocoop = ifelse(other == 1, 1, 0),
+  #     pay = case_when(
+  #       treatment %in% c("8", "9") ~ "high",
+  #       TRUE ~ "normal"
+  #     ),
+  #     delta = case_when(
+  #       treatment %in% c("1", "3", "8", "9") ~ "high",
+  #       TRUE ~ "low"
+  #     ),
+  #     suggestion = case_when(
+  #       treatment %in% c("3", "4", "9") ~ "GT suggestion",
+  #       TRUE ~ "no suggestion"
+  #     ),
+  #     treatment = as.factor(treatment),
+  #     first_stage = ifelse(stage == 1, 1, 0),
+  #     first_round = ifelse(round == 1, 1, 0)
+  #   )
   
   # generate the rd variable to 0 if pay normal and delta is low otherwise 1
   data$rd <- ifelse(data$pay == "high" & data$delta == "high", 1, 0)

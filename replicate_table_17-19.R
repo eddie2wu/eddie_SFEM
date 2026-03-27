@@ -53,6 +53,3 @@ generate_table7(file_count = 8, output_file = "tex/results_table7_substrg.tex", 
 
 
 
-
-
-

@@ -2,9 +2,9 @@
 % Cooperation in Infinitely Repeated Games: Experimental Evidence"
  
 
-% creating a diary
-delete('learningestimation.out');
-diary('learningestimation.out');
+% % creating a diary
+% delete('learningestimation.out');
+% diary('learningestimation.out');
 format long;
 
 % input data
@@ -21,16 +21,25 @@ id2_all = All(:, 6);
 est = [];
 tic = 0;
 
+% % create the variables that give the average payoff for every possibility
+% uADAD = [100,50,100,50,100,100];
+% uADG = [125,75,125,75,125,125];
+% uGAD = [87,37,87,37,87,87];
+% uGG = [128,64,128,64,160,160];
+
+
 % create the variables that give the average payoff for every possibility
-uADAD = [100,50,100,50,100,100];
-uADG = [125,75,125,75,125,125];
-uGAD = [87,37,87,37,87,87];
-uGG = [128,64,128,64,160,160];
+uADAD = [50,100,50,100,100,100,100,100];
+uADG = [75,125,75,125,125,125,125,125];
+uGAD = [37,87,37,87,87,87,87,87];
+uGG = [64,128,64,128,128,128,160,160];
+
 
 % change options for optimization
 % new option command
 MaxIter = 100;
-MaxFunEvals = 100000;
+% MaxFunEvals = 100000;
+MaxFunEvals = 1000000;
 options = optimset('MaxFunEvals',MaxFunEvals);
 
 % initialize starting value matrix
@@ -38,7 +47,7 @@ start_mat = [0,0,0,0,0,0;0,0,-10,0,0,-10;0,0,10,0,0,10;1,0,0,0,0,0;0,1,0,0,0,0;0
 stop = length(start_mat);
 
 % start of computations
-for treat = 1:6
+for treat = 1:8
     %6
     coop_treat = coop_all(treatment==treat);
     ocoop_treat = ocoop_all(treatment==treat);
@@ -104,4 +113,4 @@ save('learningestimates.txt', 'est', '-ascii', '-double', '-tabs')
 fid = fopen('done.txt', 'w');
 fclose(fid);
 
-diary off
+% diary off

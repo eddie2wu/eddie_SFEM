@@ -103,7 +103,7 @@ sum absdiff if goodrange==1, detail
 
 
 *Figure 2
-
+/*
 twoway (line coop round if treatment==1 & round<=30, title(delta=high r=normal) subtitle(SGPE) legend(off) graphregion(color(white)) xtitle("Repeated Game (log scale)") ytitle("Cooperation") yscale(range(0 1)) ylabel(#11) xscale(log) xlabel(1 5 10 20 40 100 300 1000)) (line g round if treatment==1, lpattern(dash)) (line lowlimit90 round if treatment==1,  lpattern(dot) lcolor(cranberry)) (line upplimit90 round if treatment==1, lpattern(dot) lcolor(cranberry)), saving(graphd5r32,replace)
 twoway (line coop round if treatment==2 & round<=60, title(delta=low r=normal) subtitle(Neither SGPE nor RD) legend(off) graphregion(color(white)) xtitle("Repeated Game (log scale)") ytitle("Cooperation") yscale(range(0 1)) ylabel(#11) xscale(log) xlabel(1 5 10 20 40 100 300 1000)) (line g round if treatment==2, lpattern(dash)) (line lowlimit90 round if treatment==2,  lpattern(dot) lcolor(cranberry)) (line upplimit90 round if treatment==2, lpattern(dot) lcolor(cranberry)), saving(graphd5r40,replace)
 twoway (line coop round if treatment==3 & round<=30, title(delta=high r=normal) subtitle(SGPE with GT) legend(off) graphregion(color(white)) xtitle("Repeated Game (log scale)") ytitle("Cooperation") yscale(range(0 1)) ylabel(#11) xscale(log) xlabel(1 5 10 20 40 100 300 1000)) (line g round if treatment==3, lpattern(dash)) (line lowlimit90 round if treatment==3,  lpattern(dot) lcolor(cranberry)) (line upplimit90 round if treatment==3, lpattern(dot) lcolor(cranberry)), saving(graphd5r48,replace)
@@ -114,7 +114,24 @@ twoway (line coop round if treatment==6 & round<=30, title(delta=high r=high) su
 graph combine "graphd5r32" "graphd5r40" "graphd5r48" "graphd75r32" "graphd75r40" "graphd75r48" , graphregion(color(white)) saving("figure2", replace)
 
 graph export figure2.png, replace
+*/
 
+twoway (line coop round if treatment==1 & round<=60, title(delta=low r=normal) subtitle(GT) legend(off) graphregion(color(white)) xtitle("Repeated Game (log scale)") ytitle("Cooperation") yscale(range(0 1)) ylabel(#11) xscale(log) xlabel(1 5 10 20 40 100 300 1000)) (line g round if treatment==1, lpattern(dash)) (line lowlimit90 round if treatment==1,  lpattern(dot) lcolor(cranberry)) (line upplimit90 round if treatment==1, lpattern(dot) lcolor(cranberry)), saving(graphd5r32gt,replace)
+twoway (line coop round if treatment==2 & round<=30, title(delta=high r=normal) subtitle(GT) legend(off) graphregion(color(white)) xtitle("Repeated Game (log scale)") ytitle("Cooperation") yscale(range(0 1)) ylabel(#11) xscale(log) xlabel(1 5 10 20 40 100 300 1000)) (line g round if treatment==2, lpattern(dash)) (line lowlimit90 round if treatment==2,  lpattern(dot) lcolor(cranberry)) (line upplimit90 round if treatment==2, lpattern(dot) lcolor(cranberry)), saving(graphd75r32gt,replace)
+twoway (line coop round if treatment==3 & round<=60, title(delta=low r=normal) subtitle(MIX) legend(off) graphregion(color(white)) xtitle("Repeated Game (log scale)") ytitle("Cooperation") yscale(range(0 1)) ylabel(#11) xscale(log) xlabel(1 5 10 20 40 100 300 1000)) (line g round if treatment==3, lpattern(dash)) (line lowlimit90 round if treatment==3,  lpattern(dot) lcolor(cranberry)) (line upplimit90 round if treatment==3, lpattern(dot) lcolor(cranberry)), saving(graphd5r32xy,replace)
+twoway (line coop round if treatment==4 & round<=30, title(delta=high r=normal) subtitle("MIX, no knowledge") legend(off) graphregion(color(white)) xtitle("Repeated Game (log scale)") ytitle("Cooperation") yscale(range(0 1)) ylabel(#11) xscale(log) xlabel(1 5 10 20 40 100 300 1000)) (line g round if treatment==4, lpattern(dash)) (line lowlimit90 round if treatment==4,  lpattern(dot) lcolor(cranberry)) (line upplimit90 round if treatment==4, lpattern(dot) lcolor(cranberry)), saving(graphd75r32xy,replace)
+twoway (line coop round if treatment==5 & round<=30, title(delta=high r=normal) subtitle("MIX, no knowledge nor observer") legend(off) graphregion(color(white)) xtitle("Repeated Game (log scale)") ytitle("Cooperation") yscale(range(0 1)) ylabel(#11) xscale(log) xlabel(1 5 10 20 40 100 300 1000)) (line g round if treatment==5, lpattern(dash)) (line lowlimit90 round if treatment==5,  lpattern(dot) lcolor(cranberry)) (line upplimit90 round if treatment==5, lpattern(dot) lcolor(cranberry)), saving(graphd75r32xx,replace)
+twoway (line coop round if treatment==6 & round<=30, title(delta=high r=normal) subtitle(MIX) legend(off) graphregion(color(white)) xtitle("Repeated Game (log scale)") ytitle("Cooperation") yscale(range(0 1)) ylabel(#11) xscale(log) xlabel(1 5 10 20 40 100 300 1000)) (line g round if treatment==6, lpattern(dash)) (line lowlimit90 round if treatment==6,  lpattern(dot) lcolor(cranberry)) (line upplimit90 round if treatment==6, lpattern(dot) lcolor(cranberry)), saving(graphd75r32yy,replace)
+twoway (line coop round if treatment==7 & round<=30, title(delta=high r=high) subtitle(MIX) legend(off) graphregion(color(white)) xtitle("Repeated Game (log scale)") ytitle("Cooperation") yscale(range(0 1)) ylabel(#11) xscale(log) xlabel(1 5 10 20 40 100 300 1000)) (line g round if treatment==7, lpattern(dash)) (line lowlimit90 round if treatment==7,  lpattern(dot) lcolor(cranberry)) (line upplimit90 round if treatment==7, lpattern(dot) lcolor(cranberry)), saving(graphd75r48yy,replace)
+twoway (line coop round if treatment==8 & round<=30, title(delta=high r=high) subtitle("MIX, no knowledge") legend(off) graphregion(color(white)) xtitle("Repeated Game (log scale)") ytitle("Cooperation") yscale(range(0 1)) ylabel(#11) xscale(log) xlabel(1 5 10 20 40 100 300 1000)) (line g round if treatment==8, lpattern(dash)) (line lowlimit90 round if treatment==8,  lpattern(dot) lcolor(cranberry)) (line upplimit90 round if treatment==8, lpattern(dot) lcolor(cranberry)), saving(graphd75r48xy,replace)
+
+graph combine "graphd5r32gt" "graphd75r32gt" "graphd5r32xy" "graphd75r32xy" "graphd75r32xx" "graphd75r32yy" "graphd75r48yy" "graphd75r48xy", cols(4) xsize(16) ysize(8) graphregion(color(white)) saving("figure2", replace)
+
+graph export figure2.png, replace
+
+
+
+/*
 *Figure A2.4
 use simulationresults, clear
 keep if round==1
@@ -190,3 +207,7 @@ table treatment if ll~=., c(mean lamda1 mean lamda50)
 table treatment if ll~=., c(med lamda1 med lamda50)
 
 table treatment constantnoise if ll~=., c(count ll)
+
+*/
+
+

@@ -1,9 +1,9 @@
 % simulates behavior from learning model
 % uses estimates from same treatment
 
-% creating a diary
-delete('simul_t.out');
-diary('simul_t.out');
+% % creating a diary
+% delete('simul_t.out');
+% diary('simul_t.out');
 format long;
 
 % set the number of simulated sessions
@@ -32,10 +32,15 @@ betaG_1_all = est(:, 8);
 rand('state',12345);
 
 % create the variables that give the average payoff for every possibility
-uADAD = [100,50,100,50,100,100];
-uADG = [125,75,125,75,125,125];
-uGAD = [87,37,87,37,87,87];
-uGG = [128,64,128,64,160,160];
+% uADAD = [100,50,100,50,100,100];
+% uADG = [125,75,125,75,125,125];
+% uGAD = [87,37,87,37,87,87];
+% uGG = [128,64,128,64,160,160];
+uADAD = [50,100,50,100,100,100,100,100];
+uADG = [75,125,75,125,125,125,125,125];
+uGAD = [37,87,37,87,87,87,87,87];
+uGG = [64,128,64,128,128,128,160,160];
+
 
 % initialize vars
 choice = [];
@@ -43,7 +48,7 @@ fractions = [0:1/14:1];
 counter = [];
 
 % start of computations
-for treat = 1:6
+for treat = 1:8
     % initialize vars
     choice_treat = zeros(T,1);
     delta_treat = delta_all(treat_all==treat);
@@ -118,7 +123,13 @@ for treat = 1:6
         end
         % add the choices across simulations
         choice_treat = choice_treat + choice_simul;
+        
+        % Print progress
+        if mod(i, 20) == 0
+            fprintf('treat = %d, i = %d\n', treat, i);
+        end
     end
+
     % divide the choices by number of simultaions (to get probabilities)
     choice_treat = choice_treat / simul;
     % stack the choices by treatment and put treatment number in front
@@ -134,7 +145,7 @@ save('simulationresults.txt', 'choice', '-ascii', '-double', '-tabs')
 fid = fopen('done.txt', 'w');
 fclose(fid);
 
-diary off
+% diary off
 
 
 
