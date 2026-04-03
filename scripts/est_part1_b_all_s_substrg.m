@@ -1,8 +1,8 @@
 % Disable warnings
 warning off all
 
-% Loop over full data, first 5 and last 5
-suffixes = {"", "_first5", "_last5"};
+% Loop over full data, dropped 1st quarter, first 5 and last 5
+suffixes = {"", "_drop1qtr", "_first5", "_last5"};
 
 for s = 1:length(suffixes)
 
@@ -98,7 +98,7 @@ for s = 1:length(suffixes)
         disp(p_values);
     
         % Save the results
-        output_filename = sprintf('raw/est_part1_b_%d_s%s.mat', filenum, suffix);
+        output_filename = sprintf('raw_substrg/est_part1_b_%d_s%s.mat', filenum, suffix);
     
         S = struct();
         S.gamma = gamma;

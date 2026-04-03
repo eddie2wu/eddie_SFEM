@@ -177,7 +177,8 @@ generate_table6 <- function(model_results_list = table6_analysis(), output_file 
 #' @param parameter_names Character vector. Names of the parameters
 #' @param match_type Character. Type of matches to analyze: NULL (original), "first5", "last5"
 #' @return None. Saves LaTeX table to specified output file
-generate_table7 <- function(file_count = 6, 
+generate_table7 <- function(file_count = 6,
+                            input_dir = "scripts/raw/",
                             output_file = "tex/results_table7.tex", 
                             parameter_names = c("gamma", "AD", "AC", "G", "TFT", "WSLS", "T2"),
                             match_type = NULL) {
@@ -189,7 +190,7 @@ generate_table7 <- function(file_count = 6,
   }
   
   # Load the results
-  matlab_results <- load_matlab_est(file_count, parameter_names, match_type)
+  matlab_results <- load_matlab_est(file_count, input_dir, parameter_names, match_type)
   gamma_values <- matlab_results$gamma_values
   est_values <- matlab_results$est_values
   se_values <- matlab_results$se_values
@@ -218,8 +219,18 @@ generate_table7 <- function(file_count = 6,
   # Generate LaTeX table
   table_caption <- "Estimation of Strategies Used"
   if (!is.null(match_type)) {
-    table_caption <- paste0(table_caption, " (", 
-                            ifelse(match_type == "first5", "First 5 SG", "Last 5 SG"), ")")
+    if (match_type == "first5") {
+      match_type_name <- "First 5 SG"
+    }
+    else if (match_type == "last5") {
+      match_type_name <- "Last 5 SG"
+    } else if (match_type == "drop1qtr") {
+      match_type_name <- "Drop 1st Quarter"
+    }
+    # table_caption <- paste0(table_caption, " (", 
+    #                         ifelse(match_type == "first5", "First 5 SG", "Last 5 SG"), ")")
+    table_caption <- paste0(table_caption, " (",
+                            match_type_name, ")")
   }
   
   latex_table <- kable(results, 

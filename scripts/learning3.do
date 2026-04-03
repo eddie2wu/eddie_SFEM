@@ -43,6 +43,8 @@ replace upplimit90 = 0 if coope1+coope2+coope3+coope4+coope5+coope6+coope7+coope
 sort treatment round
 save simulationresults, replace
 
+
+/*
 *Cross (uses only estimates from other treatments)
 clear
 insheet treatment round G coope0 coope1 coope2 coope3 coope4 coope5 coope6 coope7 coope8 coope9 coope10 coope11 coope12 coope13 coope14 foo using simulationresultscross.txt, tab
@@ -80,6 +82,7 @@ replace upplimit90 = 0 if coope1+coope2+coope3+coope4+coope5+coope6+coope7+coope
 
 sort treatment round
 save simulationresultscross, replace
+*/
 
 *Simulation results
 use modified_data, clear

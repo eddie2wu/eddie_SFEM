@@ -39,7 +39,7 @@ rand('state',12345);
 uADAD = [50,100,50,100,100,100,100,100];
 uADG = [75,125,75,125,125,125,125,125];
 uGAD = [37,87,37,87,87,87,87,87];
-uGG = [64,128,64,128,128,128,160,160];
+uGG = [64,128,64,128,128,128,192,192];
 
 
 % initialize vars
@@ -59,6 +59,13 @@ for treat = 1:8
     betaG_1_treat = betaG_1_all(treat_all==treat);
     id2_treat = id2_all(treat_all==treat);
     counter_treat = zeros(T,15);
+    % S = size(id2_treat, 1);
+    
+    %%% Need to store a tensor i,j,k, where i is simulation, j is time, k
+    %%% is subject. 
+    beta_G_tensor = zeros(simul, 3, S);
+    beta_AD_tensor = zeros(simul, 3, S);
+
     for i = 1:simul
         % initialize vars
         choice_simul = -999*ones(T,S);
@@ -75,6 +82,8 @@ for treat = 1:8
         betaG = betaG_1_treat(types)';
         e = rand(T, S);    e = -log( (1./e) - 1 );  % this generates random
         % numbers with a logistic distribution (mean 0, variance 1)
+      
+
         for t = 1:T
             % generate the pairs of players
             matchup = [floor(randsample(S,S,'false')/2 + 0.5)]'; % this
@@ -114,7 +123,24 @@ for treat = 1:8
                     end
                 end
             end
+            
+
+            %%% Append
+            if t == 30
+                beta_G_tensor(i,1,1:S) = betaG;
+                beta_AD_tensor(i,1,1:S) = betaAD;
+            elseif t == 60
+                beta_G_tensor(i,2,1:S) = betaG;
+                beta_AD_tensor(i,2,1:S) = betaAD;
+            elseif t == 1000
+                beta_G_tensor(i,3,1:S) = betaG;
+                beta_AD_tensor(i,3,1:S) = betaAD;
+            end
+            
+
         end
+
+
         % add the choices across subjects and divide by number of subjects;
         choice_simul = sum(choice_simul,2) / S;
         % count where thi ssession falls in terms of behavior
@@ -129,6 +155,15 @@ for treat = 1:8
             fprintf('treat = %d, i = %d\n', treat, i);
         end
     end
+
+
+    %%%%% Reshape and save as txt file for this treatment
+    beta_G_tensor = reshape(permute(beta_G_tensor, [1 3 2]), [], 3);
+    beta_AD_tensor = reshape(permute(beta_AD_tensor, [1 3 2]), [], 3);
+    save(sprintf('beta_G_treatment_%d.txt', treat), 'beta_G_tensor', '-ascii', '-double', '-tabs');
+    save(sprintf('beta_AD_treatment_%d.txt', treat), 'beta_G_tensor', '-ascii', '-double', '-tabs');
+
+
 
     % divide the choices by number of simultaions (to get probabilities)
     choice_treat = choice_treat / simul;

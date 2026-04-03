@@ -32,14 +32,14 @@ tic = 0;
 uADAD = [50,100,50,100,100,100,100,100];
 uADG = [75,125,75,125,125,125,125,125];
 uGAD = [37,87,37,87,87,87,87,87];
-uGG = [64,128,64,128,128,128,160,160];
+uGG = [64,128,64,128,128,128,192,192];
 
 
 % change options for optimization
 % new option command
 MaxIter = 100;
 % MaxFunEvals = 100000;
-MaxFunEvals = 1000000;
+MaxFunEvals = 5000000;
 options = optimset('MaxFunEvals',MaxFunEvals);
 
 % initialize starting value matrix

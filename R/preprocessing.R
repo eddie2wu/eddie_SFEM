@@ -1,12 +1,17 @@
-preprocess_data <- function(file_path = "Data/cleaned_data.csv") {
+preprocess_data <- function(file_path = "Data/cleaned_data.csv", perfect_quiz = TRUE) {
 
   # Read the Excel file
   data <- read.csv(file_path)
   
+  # Whether to use only people with perfect quiz
+  if (perfect_quiz) {
+    data <- data %>%
+      filter(
+        perfect_quiz == 1
+      )
+  }
+  
   data <- data %>%
-    filter(
-      perfect_quiz == 1
-    ) %>%
     rename(
       round = match,
       stage = round
@@ -150,8 +155,6 @@ preprocess_data <- function(file_path = "Data/cleaned_data.csv") {
 
 
 
-
-
 dfformatlab_special <- function(data = preprocess_data(), output_dir = "scripts/", strategies_selected = c("ad", "ac", "g", "tft", "wsls", "t2")){
   
   # Create output directory if it doesn't exist
@@ -159,8 +162,9 @@ dfformatlab_special <- function(data = preprocess_data(), output_dir = "scripts/
     dir.create(output_dir)
   }
   
+  
   # Only keep the variables: round, stage, coop, id, ocoop, session, id2, and treatment
-  data <- dplyr::select(data, round, stage, treatment, coop, id, ocoop, session, id2)
+  data <- dplyr::select(data, round, stage, treatment, coop, id, ocoop, session, id2, delta)
   
   # Create 6 new strategy variables: ad, ac, g, tft, wsls, t2
   data <- data %>%
@@ -182,13 +186,27 @@ dfformatlab_special <- function(data = preprocess_data(), output_dir = "scripts/
   
   # Only keep the specified strategies
   strategies_to_keep <- intersect(strategies_selected, c("ad", "ac", "g", "tft", "wsls", "t2"))
-  data <- dplyr::select(data, all_of(c("round", "stage", "treatment", "coop", "id", "ocoop", "session", "id2", strategies_to_keep)))
+  data <- dplyr::select(data, all_of( c("round", "stage", "treatment", "coop", "id", "ocoop", "session", "id2", strategies_to_keep, "delta") ) )
   
   # Split the data by the treatment variable and write to different files
   treatment_levels <- unique(data$treatment)
   
   for(treatment_level in treatment_levels){
-    subset_data <- dplyr::filter(data, treatment == treatment_level)
+    
+    # Create subset after dropping the first quarter
+    subset_data <- data %>%
+      dplyr::filter(
+        (delta == "high" & round >= 9) |
+          (delta == "low"  & round >= 16)
+      ) %>%
+      dplyr::select( all_of( c("round", "stage", "treatment", "coop", "id", "ocoop", "session", "id2", strategies_to_keep) ) ) %>%
+      dplyr::filter( treatment == treatment_level )
+    file_name <- paste0(output_dir, "dfformatlab_strg_", treatment_level, "_drop1qtr_special.txt")
+    write.table(subset_data, file = file_name, row.names = FALSE, col.names = FALSE, quote = FALSE, sep = "\t")
+    
+    # Save the full data
+    subset_data <- dplyr::select(data, all_of( c("round", "stage", "treatment", "coop", "id", "ocoop", "session", "id2", strategies_to_keep) ))
+    subset_data <- dplyr::filter(subset_data, treatment == treatment_level)
     file_name <- paste0(output_dir, "dfformatlab_strg_", treatment_level, "_special.txt")
     write.table(subset_data, file = file_name, row.names = FALSE, col.names = FALSE, quote = FALSE, sep = "\t")
     
@@ -204,6 +222,7 @@ dfformatlab_special <- function(data = preprocess_data(), output_dir = "scripts/
     last_5_filename <- paste0(output_dir, "dfformatlab_strg_", treatment_level, "_last5_special.txt")
     write.table(last_5_rounds, file = last_5_filename, row.names = FALSE, col.names = FALSE, quote = FALSE, sep = "\t")
   }
+  
   
   return(data)
 }

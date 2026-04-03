@@ -1,5 +1,5 @@
 
-data <- preprocess_data("data/eddie_repeatedgamedata_sfem.csv")
+data <- preprocess_data("data/eddie_repeatedgamedata_sfem.csv", perfect_quiz)
 df <- subset(data, stage == 1)
 df <- df[, c("round", "treatment", "coop", "id", "ocoop")]
 

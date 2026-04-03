@@ -96,8 +96,8 @@ estimation_and_simulation <- function() {
   # Run MATLAB script 2
   run_matlab_script("learningsimulation.m")
   
-  # Run MATLAB script 3
-  run_matlab_script("learningsimulationcross.m")
+  # # Run MATLAB script 3
+  # run_matlab_script("learningsimulationcross.m")
   
   # Run Stata script 2
   run_stata_script("learning3.do")
@@ -117,6 +117,7 @@ estimation_and_simulation <- function() {
 #' @param match_type Character. Type of matches to analyze: NULL (original), "first5", "last5"
 #' @return A list containing gamma values, parameter estimates, standard errors, and p-values
 load_matlab_est <- function(file_count = 6, 
+                            input_dir = "scripts/raw/",
                             parameter_names = c("gamma", "AD", "AC", "G", "TFT", "WSLS", "T2"),
                             match_type = NULL) {
   # Initialize lists to store results
@@ -128,10 +129,10 @@ load_matlab_est <- function(file_count = 6,
   # Determine file naming pattern based on match_type
   if (is.null(match_type)) {
     # Original pattern
-    file_pattern <- 'scripts/raw/est_part1_b_%d_s.mat'
+    file_pattern <- paste0(input_dir, 'est_part1_b_%d_s.mat')
   } else {
     # New pattern with match_type
-    file_pattern <- sprintf('scripts/raw/est_part1_b_%%d_s_%s.mat', match_type)
+    file_pattern <- paste0(input_dir, sprintf('est_part1_b_%%d_s_%s.mat', match_type))
   }
   
   # Load the results from the .mat files
