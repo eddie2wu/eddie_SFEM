@@ -161,7 +161,7 @@ for treat = 1:8
     beta_G_tensor = reshape(permute(beta_G_tensor, [1 3 2]), [], 3);
     beta_AD_tensor = reshape(permute(beta_AD_tensor, [1 3 2]), [], 3);
     save(sprintf('beta_G_treatment_%d.txt', treat), 'beta_G_tensor', '-ascii', '-double', '-tabs');
-    save(sprintf('beta_AD_treatment_%d.txt', treat), 'beta_G_tensor', '-ascii', '-double', '-tabs');
+    save(sprintf('beta_AD_treatment_%d.txt', treat), 'beta_AD_tensor', '-ascii', '-double', '-tabs');
 
 
 

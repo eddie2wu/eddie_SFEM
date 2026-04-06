@@ -15,7 +15,7 @@ library(tidyr)
 # Define helper functions 
 ################################################################################
 
-### Format table to look nicer
+### Format table to scientific notation
 format_table <- function(tab, digits = 3) {
   tab_out <- tab
   
@@ -34,6 +34,30 @@ format_table <- function(tab, digits = 3) {
 }
 
 
+### Format table to 2 dp
+format_dp <- function(x, digits = 2) {
+  fmt <- paste0("%.", digits, "f")
+  
+  if (is.data.frame(x)) {
+    x[] <- lapply(x, function(col) {
+      if (is.numeric(col)) sprintf(fmt, col) else col
+    })
+    return(x)
+  }
+  
+  if (is.matrix(x) && is.numeric(x)) {
+    return(matrix(sprintf(fmt, x), nrow = nrow(x)))
+  }
+  
+  if (is.numeric(x)) {
+    return(sprintf(fmt, x))
+  }
+  
+  x
+}
+
+
+
 ### Generate LaTeX table
 save_tex_table <- function(table, caption, output_file){
   latex_table <- kable(table, 
@@ -48,7 +72,7 @@ save_tex_table <- function(table, caption, output_file){
 }
 
 ################################################################################
-# Define helper functions 
+# END helper functions 
 ################################################################################
 
 
@@ -66,9 +90,22 @@ colnames(table_mean) <- cols
 table_median <- table_mean
 
 
+### Define output table for belief
+cols <- c(
+  "T",
+  "P(C)_1", "P(C)_mid", "P(C)_1000",
+  "P(D)_1", "P(D)_mid", "P(D)_1000"
+)
+table_mean_belief <- data.frame(matrix(ncol = length(cols), nrow = 0))
+colnames(table_mean_belief) <- cols
+
+table_median_belief <- table_mean_belief
+
+
+
 
 ### Load data
-learning_estimate <- read.table("scripts/learningestimatesall.txt", header = FALSE)
+learning_estimate <- read.table("scripts/archived_results/learningestimatesall.txt", header = FALSE)
 colnames(learning_estimate) <- c("treatment", "id", "learning_delta", "lambda_f", "lambda_v", "psi", "betaad_1", "betag_1")
 
 
@@ -82,11 +119,11 @@ for (treat in 1:8) {
   print(colMeans(temp0))
   
   # beta_G
-  filename <- sprintf("scripts/beta_G_treatment_%d.txt", treat)
+  filename <- sprintf("scripts/archived_results/beta_G_treatment_%d.txt", treat)
   temp1 <- read.table(filename, header = FALSE)
   
   # beta_AD
-  filename <- sprintf("scripts/beta_AD_treatment_%d.txt", treat)
+  filename <- sprintf("scripts/archived_results/beta_AD_treatment_%d.txt", treat)
   temp2 <- read.table(filename, header = FALSE)
   
   # Get 60 for delta = 1/2, 30 for delta = 3/4
@@ -152,7 +189,7 @@ for (treat in 1:8) {
   # remove Inf / NA
   plot_long <- plot_long[is.finite(plot_long$value), ]
   
-  # optional (strongly recommended for your huge numbers)
+  # put in log
   plot_long$value <- log10(abs(plot_long$value) + 1)
   
   # plot
@@ -173,6 +210,86 @@ for (treat in 1:8) {
     width = 12,
     height = 6
   )
+  
+  
+  
+  
+  
+  
+  
+  ### Repeat the same step for the beliefs at 0, mid and 1000
+  beliefG_1 = temp0[,1] / (temp0[,1] + temp0[,2])
+  beliefAD_1 = temp0[,2] / (temp0[,1] + temp0[,2])
+  
+  beliefG_mid = temp1[,1] / (temp1[,1] + temp2[,1])
+  beliefAD_mid = temp2[,1] / (temp1[,1] + temp2[,1])
+  
+  beliefG_1000 = temp1[,2] / (temp1[,2] + temp2[,2])
+  beliefAD_1000 = temp2[,2] / (temp1[,2] + temp2[,2])
+  
+  mean_row = c(treat, mean(beliefG_1, na.rm = TRUE), mean(beliefG_mid, na.rm = TRUE), mean(beliefG_1000, na.rm = TRUE),
+               mean(beliefAD_1, na.rm = TRUE), mean(beliefAD_mid, na.rm = TRUE), mean(beliefAD_1000, na.rm = TRUE))
+  
+  median_row = c(treat, median(beliefG_1, na.rm = TRUE), median(beliefG_mid, na.rm = TRUE), median(beliefG_1000, na.rm = TRUE),
+                 median(beliefAD_1, na.rm = TRUE), median(beliefAD_mid, na.rm = TRUE), median(beliefAD_1000, na.rm = TRUE))
+  
+  # Append to table
+  mean_df <- as.data.frame(t(mean_row))
+  median_df <- as.data.frame(t(median_row))
+  
+  colnames(mean_df) <- colnames(table_mean_belief)
+  colnames(median_df) <- colnames(table_median_belief)
+  
+  table_mean_belief <- rbind(table_mean_belief, mean_df)
+  table_median_belief <- rbind(table_median_belief, median_df)
+  
+  
+  
+  # Plot CDf
+  df_list <- list(
+    beliefG_1, beliefG_mid, beliefG_1000,
+    beliefAD_1, beliefAD_mid, beliefAD_1000
+  )
+  
+  names(df_list) <- c(
+    "P(C)_1", "P(C)_mid", "P(C)_1000",
+    "P(D)_1", "P(D)_mid", "P(D)_1000"
+  )
+  
+  plot_long <- do.call(rbind, Map(function(x, nm) {
+    data.frame(
+      variable = rep(nm, length(x)),
+      value = as.vector(x),
+      stringsAsFactors = FALSE
+    )
+  }, df_list, names(df_list)))
+  row.names(plot_long) <- NULL
+  
+  # remove Inf / NA
+  plot_long <- plot_long[is.finite(plot_long$value), ]
+  
+  # # put in log
+  # plot_long$value <- log10(abs(plot_long$value) + 1)
+  
+  # plot
+  p <- ggplot(plot_long, aes(x = value)) +
+    stat_ecdf() +
+    facet_wrap(~ variable, scales = "free", ncol = 3) +
+    theme_minimal() +
+    labs(
+      title = paste("Treatment", treat),
+      x = "Probability",
+      y = "CDF"
+    )
+  
+  # save
+  ggsave(
+    filename = sprintf("figures/cdf_treatment_%d_beliefs.pdf", treat),
+    plot = p,
+    width = 12,
+    height = 6
+  )
+  
 }
 
 
@@ -184,6 +301,11 @@ save_tex_table(table_mean, "Mean of Learning Model Estimates", "tex/summary_mean
 table_median <- format_table(table_median, 2)
 save_tex_table(table_median, "Median of Learning Model Estimates", "tex/summary_median.tex")
 
+table_mean_belief <- format_dp(table_mean_belief)
+save_tex_table(table_mean_belief, "Mean of Belief Estimates", "tex/summary_mean_belief.tex")
+
+table_median_belief <- format_dp(table_median_belief, 2)
+save_tex_table(table_median_belief, "Median of Belief Estimates", "tex/summary_median_belief.tex")
 
 
 
