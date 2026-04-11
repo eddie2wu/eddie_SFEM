@@ -1,4 +1,4 @@
-preprocess_data <- function(file_path = "Data/cleaned_data.csv", perfect_quiz = TRUE) {
+preprocess_data <- function(file_path, perfect_quiz = TRUE) {
 
   # Read the Excel file
   data <- read.csv(file_path)
@@ -42,12 +42,6 @@ preprocess_data <- function(file_path = "Data/cleaned_data.csv", perfect_quiz = 
     ) %>%
     arrange(id)
   
-  # # Convert the 'person'-'source' variable to a factor
-  # data <- data %>%
-  #   mutate(id = paste(source, person, sep = "_")) %>%
-  #   mutate(id = as.numeric(as.factor(id))) %>%
-  #   arrange(id)
-  
   
   # Generate coop variable based on conditions
   data <- data %>%
@@ -70,27 +64,6 @@ preprocess_data <- function(file_path = "Data/cleaned_data.csv", perfect_quiz = 
       first_stage = ifelse(stage == 1, 1, 0),
       first_round = ifelse(round == 1, 1, 0)
     )
-  
-  # data <- data %>%
-  #   mutate(
-  #     coop = ifelse(you == 1, 1, 0),
-  #     ocoop = ifelse(other == 1, 1, 0),
-  #     pay = case_when(
-  #       treatment %in% c("8", "9") ~ "high",
-  #       TRUE ~ "normal"
-  #     ),
-  #     delta = case_when(
-  #       treatment %in% c("1", "3", "8", "9") ~ "high",
-  #       TRUE ~ "low"
-  #     ),
-  #     suggestion = case_when(
-  #       treatment %in% c("3", "4", "9") ~ "GT suggestion",
-  #       TRUE ~ "no suggestion"
-  #     ),
-  #     treatment = as.factor(treatment),
-  #     first_stage = ifelse(stage == 1, 1, 0),
-  #     first_round = ifelse(round == 1, 1, 0)
-  #   )
   
   # generate the rd variable to 0 if pay normal and delta is low otherwise 1
   data$rd <- ifelse(data$pay == "high" & data$delta == "high", 1, 0)
@@ -134,11 +107,7 @@ preprocess_data <- function(file_path = "Data/cleaned_data.csv", perfect_quiz = 
     mutate(maxstage = max(stage)) %>%
     ungroup()
   
-  # # generate session variable as indicator for source within each treatment group
-  # data <- data %>%
-  #   group_by(treatment) %>%
-  #   mutate(session = as.numeric(factor(source))) %>%
-  #   ungroup()
+  # generate session variable as indicator for source within each treatment group
   data <- data %>%
     mutate(session = 1)
   
@@ -148,20 +117,22 @@ preprocess_data <- function(file_path = "Data/cleaned_data.csv", perfect_quiz = 
     mutate(id2 = as.numeric(factor(id))) %>%
     ungroup()
   
-  haven::write_dta(data, "scripts/modified_data.dta")
+  haven::write_dta(data, "data/modified_data.dta")
   
   return(data)
 }
 
 
 
-dfformatlab_special <- function(data = preprocess_data(), output_dir = "scripts/", strategies_selected = c("ad", "ac", "g", "tft", "wsls", "t2")){
+dfformatlab_special <- function(data,
+                                output_dir,
+                                strategies_selected = c("ad", "ac", "g", "tft", "wsls", "t2"),
+                                sample_tag = "full"){
   
   # Create output directory if it doesn't exist
   if(!dir.exists(output_dir)){
     dir.create(output_dir)
   }
-  
   
   # Only keep the variables: round, stage, coop, id, ocoop, session, id2, and treatment
   data <- dplyr::select(data, round, stage, treatment, coop, id, ocoop, session, id2, delta)
@@ -191,6 +162,9 @@ dfformatlab_special <- function(data = preprocess_data(), output_dir = "scripts/
   # Split the data by the treatment variable and write to different files
   treatment_levels <- unique(data$treatment)
   
+  # Define the number of strategies
+  K = length(strategies_to_keep)
+  
   for(treatment_level in treatment_levels){
     
     # Create subset after dropping the first quarter
@@ -201,28 +175,74 @@ dfformatlab_special <- function(data = preprocess_data(), output_dir = "scripts/
       ) %>%
       dplyr::select( all_of( c("round", "stage", "treatment", "coop", "id", "ocoop", "session", "id2", strategies_to_keep) ) ) %>%
       dplyr::filter( treatment == treatment_level )
-    file_name <- paste0(output_dir, "dfformatlab_strg_", treatment_level, "_drop1qtr_special.txt")
-    write.table(subset_data, file = file_name, row.names = FALSE, col.names = FALSE, quote = FALSE, sep = "\t")
+    write_special_data(
+      subset_data,
+      output_dir,
+      K,
+      treatment_level,
+      "_drop1qtr",
+      sample_tag
+    )
     
     # Save the full data
     subset_data <- dplyr::select(data, all_of( c("round", "stage", "treatment", "coop", "id", "ocoop", "session", "id2", strategies_to_keep) ))
     subset_data <- dplyr::filter(subset_data, treatment == treatment_level)
-    file_name <- paste0(output_dir, "dfformatlab_strg_", treatment_level, "_special.txt")
-    write.table(subset_data, file = file_name, row.names = FALSE, col.names = FALSE, quote = FALSE, sep = "\t")
+    write_special_data(
+      subset_data,
+      output_dir,
+      K,
+      treatment_level,
+      "",
+      sample_tag
+    )
     
     # Create subsets for first 5 rounds and last 5 rounds
     first_5_rounds <- subset_data %>% dplyr::filter(round <= 5)
     last_5_rounds <- subset_data %>% dplyr::filter(round > max(round) - 5)
     
     # Save first 5 rounds data
-    first_5_filename <- paste0(output_dir, "dfformatlab_strg_", treatment_level, "_first5_special.txt")
-    write.table(first_5_rounds, file = first_5_filename, row.names = FALSE, col.names = FALSE, quote = FALSE, sep = "\t")
+    write_special_data(
+      first_5_rounds,
+      output_dir,
+      K,
+      treatment_level,
+      "_first5",
+      sample_tag
+    )
     
     # Save last 5 rounds data
-    last_5_filename <- paste0(output_dir, "dfformatlab_strg_", treatment_level, "_last5_special.txt")
-    write.table(last_5_rounds, file = last_5_filename, row.names = FALSE, col.names = FALSE, quote = FALSE, sep = "\t")
+    write_special_data(
+      last_5_rounds,
+      output_dir,
+      K,
+      treatment_level,
+      "_last5",
+      sample_tag
+    )
   }
-  
   
   return(data)
 }
+
+
+
+write_special_data <- function(data, output_dir, K, treatment_level, suffix, sample_tag) {
+  sample_filename <- paste0(
+    output_dir,
+    "dfformatlab_strat",
+    K,
+    "_",
+    treatment_level,
+    suffix,
+    "_",
+    sample_tag,
+    ".txt"
+  )
+  write.table(data, file = sample_filename, row.names = FALSE, col.names = FALSE, quote = FALSE, sep = "\t")
+}
+
+
+
+
+
+

@@ -1,109 +1,104 @@
-run_matlab_script <- function(script_name, check_interval = 1) {
-  # Construct the full path to the MATLAB script
-  script_path <- file.path("scripts", script_name)
-  
+run_matlab_script <- function(script_name, matlab_command = "", check_interval = 1) {
   matlab_bin <- "/Applications/MATLAB_R2024a.app/bin/matlab"
   
-  # Create the command to run the MATLAB script
-  # command <- sprintf('matlab -nodisplay -r "run(\'%s\'); exit"', script_path)
-  command <- sprintf(
-    '"%s" -nodisplay -r "run(\'%s\'); exit"',
-    matlab_bin, script_path
-  )
+  out_dir <- normalizePath("intermediate_output", mustWork = FALSE)
+  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+  indicator_file <- file.path(out_dir, "done.txt")
   
-  # Set the path for the indicator file
-  indicator_file <- file.path("scripts", "done.txt")
-  
-  # Remove any existing indicator file to ensure a clean start
   if (file.exists(indicator_file)) {
     file.remove(indicator_file)
   }
   
-  # Run the MATLAB script
+  matlab_code <- sprintf(
+    "%s; try, run('%s'); fid=fopen('%s','w'); fclose(fid); catch ME, disp(getReport(ME)); end; exit",
+    matlab_command,
+    script_name,
+    gsub("\\\\", "/", indicator_file)
+  )
+  
+  command <- sprintf('"%s" -nodisplay -nosplash -nodesktop -r "%s"', matlab_bin, matlab_code)
+  
+  print(command)
   system(command, wait = FALSE)
   
-  # Function to check for completion with dynamic text feedback
   wait_for_completion <- function(file_path, check_interval = 1) {
-    symbols <- c("-", "\\", "|", "/")  # Symbols for rotation
-    i <- 1  # Index for rotating symbols
-    
+    symbols <- c("-", "\\", "|", "/")
+    i <- 1
     while (!file.exists(file_path)) {
-      # Print dynamic message with rotating symbol
       cat(sprintf("\rWaiting for MATLAB script to finish... %s", symbols[i]))
-      
-      # Rotate the symbol
       i <- ifelse(i == length(symbols), 1, i + 1)
-      
-      # Wait for the specified interval
       Sys.sleep(check_interval)
     }
-    
-    # Clear the line after completion
     cat("\rWaiting for MATLAB script to finish... done!\n")
   }
   
-  # Wait for the MATLAB script to finish
   wait_for_completion(indicator_file, check_interval)
-  
-  # Delete the indicator file
   file.remove(indicator_file)
-  
-  # Inform that the script has finished executing
   print("MATLAB script has finished executing.")
 }
 
 
 
+run_stata_script <- function(script_name, autoplay_tag = NULL, sample = NULL) {
+  wrapper <- tempfile(fileext = ".do")
+
+  lines <- character(0)
+
+  if (!is.null(autoplay_tag)) {
+    lines <- c(lines, sprintf('global autoplay_tag "%s"', autoplay_tag))
+  }
+
+  if (!is.null(sample)) {
+    lines <- c(lines, sprintf('global sample "%s"', sample))
+  }
+
+  lines <- c(
+    lines,
+    "set more off",
+    sprintf('do "%s"', normalizePath(script_name, winslash = "/"))
+  )
+
+  writeLines(lines, wrapper)
+  stata(wrapper, stata.echo = FALSE)
+}
 
 
-estimation_and_simulation <- function() {
+
+
+estimation_and_simulation <- function(autoplayer = FALSE, sample = "full") {
   
-  # Set options for RStata
-  cat("Please select the path to your Stata executable:\n")
-  # chooseStataBin() # Replace with the path to your Stata executable
+  # Define variable
+  autoplay_tag = if (autoplayer) "ap1" else "ap0"
+  
+  # # Set options for RStata
+  # cat("Please select the path to your Stata executable:\n")
   
   options(
     RStata.StataPath = "/Applications/Stata/StataSE.app/Contents/MacOS/StataSE",
     RStata.StataVersion = 18
   )
   
-  
-  # # Ask the user to enter the Stata version number
-  # stata_version <- as.numeric(readline(prompt = "Please enter your Stata version number (e.g., 18): "))
-  
-  # # Set options for RStata
-  # options(RStata.StataVersion = stata_version)
-  
-  # Function to run Stata script with message
-  run_stata_script <- function(script_name) {
-    cat(sprintf("Executing Stata script: %s\n", script_name))
-    stata(file.path("scripts", script_name), stata.echo = FALSE)
-    cat(sprintf("Finished executing Stata script: %s\n", script_name))
-  }
-  
-  
-  # Run R script 1
-  cat("Executing R script: learning1.R\n")
-  source("R/learning1.R")
-  cat("Finished executing R script: learning1.R\n")
-  
-  # Run MATLAB script 1
-  run_matlab_script("learningestimation.m")
-  
-  # Run Stata script 1
-  run_stata_script("learning2.do")
-  
-  # Run MATLAB script 2
-  run_matlab_script("learningsimulation.m")
-  
-  # # Run MATLAB script 3
-  # run_matlab_script("learningsimulationcross.m")
-  
+# 
+#   # Run R script 1
+#   cat("Executing R script: learning1.R\n")
+#   source("R/learning1.R")
+#   cat("Finished executing R script: learning1.R\n")
+# 
+#   # Run MATLAB script 1
+#   run_matlab_script("MATLAB/learningestimation.m")
+# 
+#   # Run Stata script 1
+#   run_stata_script("Stata/learning2.do")
+# 
+#   # Run MATLAB script 2
+#   matlab_command <- sprintf("sample = '%s'; autoplayer = %d; ", sample, autoplayer)
+#   run_matlab_script("MATLAB/learningsimulation.m", matlab_command)
+#   
   # Run Stata script 2
-  run_stata_script("learning3.do")
+  run_stata_script("Stata/learning3.do", autoplay_tag, sample)
+
   
   print("All scripts have finished executing.")
-  
 }
 
 
@@ -116,24 +111,30 @@ estimation_and_simulation <- function() {
 #' @param parameter_names Character vector. Names of the parameters.
 #' @param match_type Character. Type of matches to analyze: NULL (original), "first5", "last5"
 #' @return A list containing gamma values, parameter estimates, standard errors, and p-values
-load_matlab_est <- function(file_count = 6, 
-                            input_dir = "scripts/raw/",
+load_matlab_est <- function(file_count, 
+                            input_dir,
                             parameter_names = c("gamma", "AD", "AC", "G", "TFT", "WSLS", "T2"),
-                            match_type = NULL) {
+                            match_type = NULL,
+                            strategy_count = NULL,
+                            sample_tag = NULL) {
+  
   # Initialize lists to store results
   gamma_values <- numeric(file_count)
   est_values <- matrix(NA, nrow = length(parameter_names)-1, ncol = file_count)
   se_values <- matrix(NA, nrow = length(parameter_names)-1, ncol = file_count)
   p_values <- matrix(NA, nrow = length(parameter_names), ncol = file_count)
   
-  # Determine file naming pattern based on match_type
+
   if (is.null(match_type)) {
-    # Original pattern
-    file_pattern <- paste0(input_dir, 'est_part1_b_%d_s.mat')
+    temp <- sprintf("est_part1_b_S%d_%%d_%s.mat", strategy_count, sample_tag)
   } else {
-    # New pattern with match_type
-    file_pattern <- paste0(input_dir, sprintf('est_part1_b_%%d_s_%s.mat', match_type))
+    temp <- sprintf("est_part1_b_S%d_%%d_%s_%s.mat", strategy_count, match_type, sample_tag)
   }
+  
+  file_pattern <- paste0(
+    input_dir,
+    temp
+  )
   
   # Load the results from the .mat files
   for (filenum in 1:file_count) {
@@ -154,3 +155,6 @@ load_matlab_est <- function(file_count = 6,
   
   return(list(gamma_values = gamma_values, est_values = est_values, se_values = se_values, p_values = p_values))
 }
+
+
+

@@ -27,7 +27,7 @@ df <- df %>%
 df <- df %>%
   arrange(treatment, id2, round)
 
-write.table(df, "scripts/dfformatlab.txt", row.names = FALSE, col.names = FALSE, quote = FALSE, sep = "\t")
+write.table(df, "intermediate_output/learningmodel/dfformatlab.txt", row.names = FALSE, col.names = FALSE, quote = FALSE, sep = "\t")
 
 
 
