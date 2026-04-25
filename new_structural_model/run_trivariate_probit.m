@@ -1,4 +1,4 @@
-function results = run_trivariate_probit()
+function results = run_trivariate_probit(treatment)
 % Trivariate model estimated via multivariate probit with simulated max
 % likelihood.
 %
@@ -21,14 +21,14 @@ function results = run_trivariate_probit()
     config.cooperate_label = 'A';
     config.threshold = log((50 - Gamma) ./ (Gamma - 25));
 
-    config.output_mat_file = 'result/trivariate_probit_results.mat';
+    config.output_mat_file = sprintf('result/trivariate_probit_results_t%d.mat', treatment);
     config.sim_draws = 2000;
     config.halton_skip = 100;
     config.use_antithetic = true;
 
 
     % Preprocess data
-    data = preprocess_data(config);
+    data = preprocess_data(config, treatment);
 
     % Estimate parameters
     results = estimate_trivariate_probit(data, config);
@@ -43,6 +43,7 @@ function results = run_trivariate_probit()
 
     % Print results
     fprintf('\nTrivariate latent probit finished.\n');
+    fprintf('Using treatment: %d\n', treatment);
     fprintf('Number of subjects kept: %d\n', data.N);
     fprintf('Used perfect_quiz == 1: %d\n', config.use_perfect_quiz_only);
 

@@ -1,4 +1,4 @@
-function results = run_baseline_logit()
+function results = run_baseline_logit(treatment)
 % Baseline hierarchical logit for:
 %   1. Q2 
 %   2. Q3 
@@ -26,12 +26,12 @@ function results = run_baseline_logit()
     config.use_perfect_quiz_only = true;
     config.quad_nodes = 50;
     config.cooperate_label = 'A';
-    config.output_mat_file = 'result/baseline_logit_results.mat';
+    config.output_mat_file = sprintf('result/baseline_logit_results_t%d.mat', treatment);
     config.threshold = log( (50-Gamma) ./ (Gamma-25) );
 
 
     % Preprocess data
-    data = preprocess_data(config);
+    data = preprocess_data(config, treatment);
     
     % Estimate parameter
     results = estimate_baseline_logit(data, config);
@@ -40,6 +40,7 @@ function results = run_baseline_logit()
     save(config.output_mat_file, 'results', 'config');
     
     fprintf('\nBaseline hierarchical logit finished.\n');
+    fprintf('Using treatment: %d\n', treatment);
     fprintf('Number of subjects kept: %d\n', data.N);
     fprintf('Used perfect_quiz == 1 only: %d\n', config.use_perfect_quiz_only);
     fprintf('\nParameter estimates\n');
