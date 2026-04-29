@@ -26,8 +26,28 @@ function results = estimate_baseline_logit(data, config)
     mean_last = mean(data.y_last);
 
     mu0 = logit_clip(mean_last);
-    theta0 = [mu0, log(0.5), logit_clip(mean_q2) - mu0, ...
-        logit_clip(mean_q3) - mu0, 0, 0, 0];
+    % theta0 = [mu0, log(0.5), logit_clip(mean_q2) - mu0, ...
+    %     logit_clip(mean_q3) - mu0, 0, 0, 0];
+
+    % theta0 = [
+    %     randn * 1.0,        % mu_theta
+    %     log(0.5) + 0.2*randn,   % log_sigma_theta
+    %     randn * 0.5,        % beta_q2
+    %     randn * 0.5,        % beta_q3
+    %     log(1) + 0.2*randn, % log_s_q2
+    %     log(1) + 0.2*randn, % log_s_q3
+    %     log(1) + 0.2*randn  % log_s_last
+    % ];
+    
+    theta0 = [
+        randn,        % mu_theta
+        randn,   % log_sigma_theta
+        randn,        % beta_q2
+        randn,        % beta_q3
+        randn,  % log_s_q2
+        randn,  % log_s_q3
+        randn   % log_s_last
+    ];
 
     results = struct();
     results.theta0 = theta0;
@@ -116,7 +136,8 @@ function nll = baseline_neg_loglik(theta, data, nodes, weights)
         p_q2 = logistic_stable((theta_draws + beta_q2 - threshold_i) ./ s_q2);
         p_q3 = logistic_stable((theta_draws + beta_q3 - threshold_i) ./ s_q3);
         p_last = logistic_stable((theta_draws - threshold_i) ./ s_last);
-    
+        
+        % Ensure bounded in 0, 1
         p_q2 = min(max(p_q2, realmin), 1 - realmin);
         p_q3 = min(max(p_q3, realmin), 1 - realmin);
         p_last = min(max(p_last, realmin), 1 - realmin);

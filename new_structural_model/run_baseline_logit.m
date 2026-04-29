@@ -2,7 +2,7 @@ function results = run_baseline_logit(treatment)
 % Baseline hierarchical logit for:
 %   1. Q2 
 %   2. Q3 
-%   3. All choices in each subject's last supergame
+%   3. First choice in each subject's last supergame
 %
 % Assumptions in this baseline:
 %   - Keep only treatments 7 and 19.
@@ -24,7 +24,7 @@ function results = run_baseline_logit(treatment)
     config = struct();
     config.data_file = 'data/eddie_repeatedgamedata_sfem.csv';
     config.use_perfect_quiz_only = true;
-    config.quad_nodes = 50;
+    config.quad_nodes = 15;
     config.cooperate_label = 'A';
     config.output_mat_file = sprintf('result/baseline_logit_results_t%d.mat', treatment);
     config.threshold = log( (50-Gamma) ./ (Gamma-25) );
