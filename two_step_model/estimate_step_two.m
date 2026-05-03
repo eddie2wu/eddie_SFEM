@@ -134,7 +134,9 @@ function nll = subject_negloglik(theta, yi, yi_ap, Gamma, mu, sigma, nodes, weig
         lambda_t = lambda_F + (phi ^ t) * lambda_V;
 
         % Integrate P(AD) over alpha_t
-        alpha_nodes = mu(t) + sqrt(2) * sigma(t) * nodes;
+        log_alpha_nodes = mu(t) + sqrt(2) * sigma(t) * nodes;
+        alpha_nodes = exp(log_alpha_nodes);
+
         Delta = (50 - Gamma) + ...
                     (13 * b)/(1-b) - ...
                     alpha_nodes * (Gamma - 25);

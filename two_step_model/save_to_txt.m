@@ -1,10 +1,12 @@
 
 clear; clc;
 
+
 % ====== USER SETTINGS ======
 
+treatment = 2;
 in_dir = "result";
-mat_file = "step_one_results_t1.mat";   % change this
+mat_file = sprintf("step_one_small_iterative_results_t%d.mat", treatment);   % change this
 out_dir  = "result/txt";  % output folder
 struct_name = "results";             % change if your struct has another name
 
