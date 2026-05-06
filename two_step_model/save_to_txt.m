@@ -4,9 +4,9 @@ clear; clc;
 
 % ====== USER SETTINGS ======
 
-treatment = 2;
+treatment = 1;
 in_dir = "result";
-mat_file = sprintf("step_one_small_iterative_results_t%d.mat", treatment);   % change this
+mat_file = sprintf("step_one_small_iterative_MC_results_t%d.mat", treatment);   % change this
 out_dir  = "result/txt";  % output folder
 struct_name = "results";             % change if your struct has another name
 

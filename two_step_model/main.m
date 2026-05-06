@@ -1,6 +1,6 @@
 
 perfect_quiz = true;
-t_step_one = 2;
+t_step_one = 1;
 % t_step_two = 3;
 
 run_step_one(t_step_one, perfect_quiz);
